@@ -20,7 +20,7 @@ public class CultureController {
     private final String dataFile =  "E:\\Git\\workspace\\Contest\\CultureData\\src\\main\\resources\\data.xlsx"; // 전체 데이터 파일
     private List<Culture> cultureObj = new ArrayList<Culture>();
     private List<String> culture = new ArrayList<String>();
-    private final String[] theme = new String[]{"유적지", "사찰", "전통시장", "역사", "박물관/미술관", "기념관", "관광지", "공원", "문화", "체험", "스토리"}; // 테마들
+    private final String[] theme = new String[]{"Historic site", "Temple", "Market", "History", "Bukchon culture experience"}; // 테마들
 
     public CultureController() {
         try {
