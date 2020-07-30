@@ -78,10 +78,12 @@ public class CultureController {
     }
 
     @RequestMapping("/range_search")
-    public String range_search(Model model, String category) {
+    public String range_search(Model model, String category, Double indexLat, Double indexLng) {
         model.addAttribute("culture", culture);
         model.addAttribute("theme", theme);
         model.addAttribute("category", category);
+        model.addAttribute("indexLat", indexLat);
+        model.addAttribute("indexLng", indexLng);
         return "range_search";
     }
 

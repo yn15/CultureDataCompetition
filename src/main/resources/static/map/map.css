@@ -100,34 +100,38 @@ html, body {
         /* padding: 5px 10px; */
     }
 
-    /* .wrap {z-index: 2; position: absolute;left: 0;bottom: 40px;width: auto;height: auto;padding-bottom: 12px; margin-left: -144px;text-align: left;overflow: hidden;font-size: 13px;font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;} */
-    .wrap {z-index: 2; position: absolute;left: 200px;bottom: 200px;width: auto;height: auto;padding-bottom: 12px;margin-left: -144px;text-align: left;overflow: hidden;font-size: 13px;font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;}
+    .wrap {z-index: 2; position: absolute;left: 0;bottom: 40px;width: auto;height: auto;padding-bottom: 12px; margin-left: -144px;text-align: left;overflow: hidden;font-size: 13px;font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;}
+    /*.wrap {z-index: 2; position: absolute;left: 200px;bottom: 200px;width: auto;height: auto;padding-bottom: 12px;margin-left: -144px;text-align: left;overflow: hidden;font-size: 13px;font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;}*/
     .wrap * {padding: 0;margin: 0;}
     .wrap .info {width: auto;height: auto;border-radius: 5px;border-bottom: 2px solid #ccc;border-right: 1px solid #ccc;overflow: hidden;background: #fff;}
     .wrap .info:nth-child(1) {border: 0;box-shadow: 0px 1px 2px #888;}
-    .info .title {padding: 5px 0 0 10px;width: 310px;height: auto;border-bottom: 1px solid #ddd;font-size: 18px;font-weight: bold; color: white;}
+    /*.info .title {padding: 5px 0 0 10px;width: 310px;height: auto;border-bottom: 1px solid #ddd;font-size: 18px;font-weight: bold; color: white;}*/
+    .info .title {padding: 5px 30px 0 10px;width: 230px;height: auto;border-bottom: 1px solid #ddd;font-size: 18px;font-weight: bold; color: white;}
     .info .close {position: absolute;top: 5px;right: 5px;color: #888;width: 25px;height: 25px;background: url('baseline_close_white_48dp.png'); background-size: 25px;}
     .info .close:hover {cursor: pointer;}
-    .info .body {position: relative;overflow-y: auto; max-height: 150px; width: 320px; color: #ffffff; background-color: #414141;}
+    /*.info .body {position: relative;overflow-y: auto; max-height: 150px; width: 320px; color: #ffffff; background-color: #414141;}*/
+    .info .body {position: relative;overflow-y: auto; max-height: 150px; width: 270px; color: #ffffff; background-color: #414141; font-size: 13px;}
     .info .desc {padding: 5px 10px 5px 10px; width: auto; height: auto;}
     .desc .ellipsis {width: auto; height: auto;}
     .desc .jibun {font-size: 11px;color: #888;margin-top: -2px;}
     .info .img {width: fit-content;height: fit-content; float: right; margin: 5px 10px 5px 10px}
-    .info:after {content: '';position: absolute;margin-left: -12px;left: 50%;bottom: 0;width: 22px;height: 12px;background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')}
+    /*.info:after {content: '';position: absolute;margin-left: -12px;left: 50%;bottom: 0;width: 22px;height: 12px;background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')}*/
     .info .link {color: #5085BB;}
 
     .overlay-address {
-        width: 300px;
+        width: 250px;
         margin: 0px 10px;
         color: #000000;
         background-color: #ffffff;
+        font-size: 11px;
     }
 
     .overlay-tel {
-        width: 300px;
+        width: 250px;
         margin: 0px 10px;
         color: #000000;
         background-color: #ffffff;
+        font-size: 11px;
     }
 
     .search {
@@ -412,8 +416,8 @@ html, body {
         /* padding: 5px 10px; */
     }
 
-    /* .wrap {z-index: 2; position: absolute;left: 0;bottom: 40px;width: auto;height: auto;padding-bottom: 12px; margin-left: -144px;text-align: left;overflow: hidden;font-size: 13px;font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;} */
-    .wrap {z-index: 2; position: absolute;left: 400px;bottom: 300px;width: auto;height: auto;padding-bottom: 12px;margin-left: -144px;text-align: left;overflow: hidden;font-size: 13px;font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;}
+    .wrap {z-index: 2; position: absolute;left: 0;bottom: 40px;width: auto;height: auto;padding-bottom: 12px; margin-left: -144px;text-align: left;overflow: hidden;font-size: 13px;font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;}
+    /*.wrap {z-index: 2; position: absolute;left: 400px;bottom: 300px;width: auto;height: auto;padding-bottom: 12px;margin-left: -144px;text-align: left;overflow: hidden;font-size: 13px;font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;}*/
     .wrap * {padding: 0;margin: 0;}
     .wrap .info {width: auto;height: auto;border-radius: 5px;border-bottom: 2px solid #ccc;border-right: 1px solid #ccc;overflow: hidden;background: #fff;}
     .wrap .info:nth-child(1) {border: 0;box-shadow: 0px 1px 2px #888;}
@@ -425,7 +429,7 @@ html, body {
     .desc .ellipsis {width: auto; height: auto;}
     .desc .jibun {font-size: 11px;color: #888;margin-top: -2px;}
     .info .img {width: fit-content;height: fit-content; float: right; margin: 5px 5px 5px 5px}
-    .info:after {content: '';position: absolute;margin-left: -12px;left: 50%;bottom: 0;width: 22px;height: 12px;background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')}
+    /*.info:after {content: '';position: absolute;margin-left: -12px;left: 50%;bottom: 0;width: 22px;height: 12px;background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')}*/
     .info .link {color: #5085BB;}
 
     .overlay-address {
@@ -433,6 +437,7 @@ html, body {
         width: 320px;
         color: #000000;
         background-color: #ffffff;
+        visibility: hidden;
     }
 
     .overlay-tel {
@@ -440,6 +445,7 @@ html, body {
         width: 320px;
         color: #000000;
         background-color: #ffffff;
+        visibility: hidden;
     }
 
     .search {

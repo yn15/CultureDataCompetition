@@ -58,7 +58,10 @@
     var culture = /*[[${culture}]]*/ 'default'; // 전체 데이터
     var theme_category = /*[[${theme}]]*/ 'default'; // 테마들
     var category = /*[[${category}]]*/ 'All';
+    var indexLat = /*[[${indexLat}]]*/ 'default';
+    var indexLng= /*[[${indexLng}]]*/ 'default';
     /*]]>*/
+
     var watchState = false;
     // 데이터 처리
     var theme = []; // 데이터들이 저장될 배열 [[유적지 테마 데이터들(딕셔너리들)], [사찰 테마 데이터들(딕셔너리들)], ...]
@@ -97,7 +100,7 @@
     var current_theme = theme_category[current_theme_index]; // 현재 설정된 테마
 
     // 반경 관리 변수
-    var distance = 10000; // 미터 단위의 반경 (현재 디버깅 때문에 이렇게 설정. 후에 대폭 감소 예정)
+    var distance = 1000000; // 미터 단위의 반경 (현재 디버깅 때문에 이렇게 설정. 후에 대폭 감소 예정)
 
     // 지도 처리
     var mapContainer = document.getElementById('map'); // 지도를 표시할 div
@@ -173,6 +176,10 @@
 
         var lat = pos.coords.latitude; // 현재 위도
         var lng = pos.coords.longitude; // 현재 경도
+        if(indexLat != null && indexLng != null){
+            lat = indexLat;
+            lng = indexLng;
+        }
         console.log(lat,lng);
 
         // 마커 초기화
@@ -186,8 +193,8 @@
         //var menuEl = document.getElementById('menu_wrap');
         var fragment = document.createDocumentFragment();
         removeAllChildNods(listEl); // 검색 결과 목록에 추가된 항목들 제거
-        var currentLocation = new kakao.maps.LatLng(37.566535, 126.9779692); //###test kkc
-        //var currentLocation = new kakao.maps.LatLng(lat, lng); // 이동할 위도 경도 위치 생성
+        //var currentLocation = new kakao.maps.LatLng(37.566535, 126.9779692); //###test kkc
+        var currentLocation = new kakao.maps.LatLng(lat, lng); // 이동할 위도 경도 위치 생성
         map.setCenter(currentLocation); // 지도 중심 이동
         var index = 1; // 결과 번호
         var lineLine = new kakao.maps.Polyline();
@@ -211,14 +218,16 @@
 
                     // 목록 처리****************
                     var itemEl = getListItem(index, theme[current_theme_index][i]); // 검색 결과 항목 Element 생성
-                    (function(marker, spaceInfo) {
+                    var pos = new kakao.maps.LatLng(theme[current_theme_index][i].lat, theme[current_theme_index][i].lng);
+                    (function(marker, spaceInfo, pos) {
                         itemEl.onmouseover =  function () { // 검색결과 항목에 mouseover 했을 때
                             displayInfowindow(marker, spaceInfo); // 인포윈도우에 정보 표시
+                            map.panTo(pos);
                         };
                         itemEl.onmouseout =  function () { // 검색결과 항목에서 mouseout 했을 때
                             infowindow.close(); // 인포윈도우 닫음
                         };
-                    })(marker, theme[current_theme_index][i]);
+                    })(marker, theme[current_theme_index][i], pos);
 
 
                     var content =
@@ -234,6 +243,8 @@
                         +'           <div class="ellipsis">'+theme[current_theme_index][i].e_describe +'</div>'
                         +'       </div>'
                         +'    </div>'
+                        +'    <div class="overlay-address"><span>'+theme[current_theme_index][i].gu +'</span> <span>'+theme[current_theme_index][i].dong +'</span></div>'
+                        +'    <div class="overlay-tel">'+theme[current_theme_index][i].tel +'</div>'
                         +'</div>';
 
                     var info = new kakao.maps.InfoWindow({
@@ -281,6 +292,8 @@
                             +'           <div class="ellipsis">'+theme[i][j].e_describe +'</div>'
                             +'       </div>'
                             +'    </div>'
+                            +'    <div class="overlay-address"><span>'+theme[i][j].gu +'</span> <span>'+theme[i][j].dong +'</span></div>'
+                            +'    <div class="overlay-tel">'+theme[i][j].tel +'</div>'
                             +'</div>';
 
                         var info = new kakao.maps.InfoWindow({
@@ -291,17 +304,18 @@
 
 
                         // 목록 처리****************
-                        var itemEl = getListItem(index, theme[i][j]); // 검색 결과 항목 Element 생성
-                        itemEl.onclick = displayInfoWindowClick(map, marker,info);
-                        (function(marker, spaceInfo) {
+                        var pos = new kakao.maps.LatLng(theme[i][j].lat, theme[i][j].lng);
+                        var itemEl = getListItem(index, theme[i][j], pos); // 검색 결과 항목 Element 생성
+                        (function(marker, spaceInfo, pos) {
                             itemEl.onmouseover=  function () { // 검색결과 항목에 mouseover 했을 때
                                 displayInfowindow(marker, spaceInfo); // 인포윈도우에 정보 표시/..
+                                map.panTo(pos);
                             };
                             itemEl.onmouseout =  function () { // 검색결과 항목에서 mouseout 했을 때
                                 infowindow.close(); // 인포윈도우 닫음
                             };
                             //***test====================var content = '<div class="wrap">'+
-                        })(marker, theme[i][j]);
+                        })(marker, theme[i][j], pos);
 
                         fragment.appendChild(itemEl);
 
@@ -312,6 +326,7 @@
         }
         listEl.appendChild(fragment); // 검색결과 항목들을 검색결과 목록 Element에 추가
         //menuEl.scrollTop = 0;
+        indexLng = null; //없으면, 현재위치를 클릭해도 행정구중심으로 고정
     }
 
     // 인포 윈도우 표시 함수 (인포 윈도우 내용 및 디자인 변경 시 이 안에 있는 HTML 코드 변경해야 함)
@@ -331,7 +346,10 @@
             +'           <div class="ellipsis">'+spaceInfo.e_describe +'</div>'
             +'       </div>'
             +'    </div>'
+            +'    <div class="overlay-address"><span>'+spaceInfo.gu +'</span> <span>'+spaceInfo.dong +'</span></div>'
+            +'    <div class="overlay-tel">'+spaceInfo.tel +'</div>'
             +'</div>';
+
         infowindow.setContent(content);
         infowindow.open(map, marker);
     }
@@ -410,7 +428,7 @@
                         }
                     });
 
-                    var imageSize = new kakao.maps.Size(24, 35); // 마커 이미지의 크기
+                    var imageSize = new kakao.maps.Size(40, 40); // 마커 이미지의 크기
                     var markerImage = new kakao.maps.MarkerImage(markerImageSrc[i], imageSize); // 마커 이미지 생성
                     var marker = new kakao.maps.Marker({ // 마커 생성
                         map: map, // 마커를 표시할 지도
