@@ -57,9 +57,9 @@
     /*<![CDATA[*/
     var culture = /*[[${culture}]]*/ 'default'; // 전체 데이터
     var theme_category = /*[[${theme}]]*/ 'default'; // 테마들
+    var category = /*[[${category}]]*/ 'All';
     /*]]>*/
     var watchState = false;
-
     // 데이터 처리
     var theme = []; // 데이터들이 저장될 배열 [[유적지 테마 데이터들(딕셔너리들)], [사찰 테마 데이터들(딕셔너리들)], ...]
     for (var i = 0; i < theme_category.length; i++) {
@@ -86,7 +86,14 @@
     }
 
     // 현재 테마 정보 관리 변수
-    var current_theme_index = 4; // 현재 설정된 테마의 인덱스
+    var current_theme_index = 4;
+    if(category === null){
+        current_theme_index = 4;
+    }else{
+        current_theme_index = theme_category.indexOf(category);
+
+    }
+    // 현재 설정된 테마의 인덱스
     var current_theme = theme_category[current_theme_index]; // 현재 설정된 테마
 
     // 반경 관리 변수
@@ -182,7 +189,6 @@
         var currentLocation = new kakao.maps.LatLng(37.566535, 126.9779692); //###test kkc
         //var currentLocation = new kakao.maps.LatLng(lat, lng); // 이동할 위도 경도 위치 생성
         map.setCenter(currentLocation); // 지도 중심 이동
-
         var index = 1; // 결과 번호
         var lineLine = new kakao.maps.Polyline();
         if(current_theme != "All"){
@@ -235,7 +241,6 @@
                         removable: true
                     });
                     kakao.maps.event.addListener(marker, 'click', displayInfoWindowClick(map, marker,info));
-                    //kakao.maps.event.addListener(marker, 'click', displayCustomOverlayOut(infoWindow));
 
 
                     fragment.appendChild(itemEl);
@@ -263,22 +268,9 @@
                         });
                         markers.push(marker);
 
-                        // 목록 처리****************
-                        var itemEl = getListItem(index, theme[i][j]); // 검색 결과 항목 Element 생성
-                        (function(marker, spaceInfo) {
-                            itemEl.onmouseover =  function () { // 검색결과 항목에 mouseover 했을 때
-                                displayInfowindow(marker, spaceInfo); // 인포윈도우에 정보 표시
-                            };
-                            itemEl.onmouseout =  function () { // 검색결과 항목에서 mouseout 했을 때
-                                infowindow.close(); // 인포윈도우 닫음
-                            };
-                            //***test====================var content = '<div class="wrap">'+
-                        })(marker, theme[i][j]);
-
-
                         var content =
                             '<div class="info">'+
-                            '    <div class="title'+theme[i][j].category +'">'
+                            '    <div class="title '+theme[i][j].category +'">'
                             + theme[i][j].e_name+
                             '    </div>'
                             +'   <div class="body">'
@@ -297,6 +289,20 @@
                         });
                         kakao.maps.event.addListener(marker, 'click', displayInfoWindowClick(map, marker,info));
 
+
+                        // 목록 처리****************
+                        var itemEl = getListItem(index, theme[i][j]); // 검색 결과 항목 Element 생성
+                        itemEl.onclick = displayInfoWindowClick(map, marker,info);
+                        (function(marker, spaceInfo) {
+                            itemEl.onmouseover=  function () { // 검색결과 항목에 mouseover 했을 때
+                                displayInfowindow(marker, spaceInfo); // 인포윈도우에 정보 표시/..
+                            };
+                            itemEl.onmouseout =  function () { // 검색결과 항목에서 mouseout 했을 때
+                                infowindow.close(); // 인포윈도우 닫음
+                            };
+                            //***test====================var content = '<div class="wrap">'+
+                        })(marker, theme[i][j]);
+
                         fragment.appendChild(itemEl);
 
                         index += 1;
@@ -310,6 +316,7 @@
 
     // 인포 윈도우 표시 함수 (인포 윈도우 내용 및 디자인 변경 시 이 안에 있는 HTML 코드 변경해야 함)
     function displayInfowindow(marker, spaceInfo) {
+
         var content =
             '<div class="info">'+
             '    <div class="title '+spaceInfo.category +'">'
@@ -443,7 +450,7 @@
         // 커스텀 오버레이에 표시할 내용 (HTML 문자열 또는 Dom Element)
         var content = '<div class="wrap">' +
             '                <div class="info">' +
-            '                    <div class="title temple">' + name +
+            '                    <div class="title '+spaceInfo.category+ '">' + name +
             '                        <div class="close" onclick="closeOverlay(\'' + name + '\')" title="close"></div>' +
             '                    </div>' +
             '                    <div class="body">' +
