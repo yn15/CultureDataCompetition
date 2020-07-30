@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Explore Seoul</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Roboto&family=Rowdies:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/stylefortag.css">
+</head>
+<body>
+<script type="text/javascript"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var culture = /*[[${culture}]]*/ 'default'; // 전체 데이터
+    var tag_class = /*[[${tag_s}]]*/ 'default'; // 테마들
+    /*]]>*/
+
+    var a_tag = [];
+    for (var i = 0; i < tag_class.length; i++) {
+        a_tag.push([]); // 테마 수만큼 배열 생성
+    }
+    for (var i = 0; i < culture.length; i++) {
+        var info = JSON.parse(culture[i]); // 해당 테마의 정보들
+        var idx = tag_class.indexOf(info.tag);
+        if(!((info.tag=="")||(info.tag==null))){
+            var idx = tag_class.indexOf(info.tag);
+            a_tag[idx].push({
+                k_name: info.k_name,
+                e_name: info.e_name,
+                gu: info.gu,
+                dong: info.dong,
+                k_describe: info.k_describe,
+                e_describe: info.e_describe,
+                tel: info.tel,
+                img_url: info.img_url,
+                tag: info.tag
+            })
+        }}
+    window.onload = function() {
+        for(var i=0; i<5; i++){
+            document.getElementById('title'+i).innerHTML = a_tag[5][i].k_name + '('+a_tag[5][i].e_name + ')';
+            document.getElementById('name'+i).innerHTML =  a_tag[5][i].k_describe + '<br><br>' + a_tag[5][i].e_describe + a_tag[5][i].tel;
+
+        }
+    }
+
+</script>
+<div class="logo">
+    <a href="index"><img src="/assets/img/logo/labelImg2.png" style="display:block;"></a>
+</div>
+<div class="container">
+    <div class="tag_title">
+        <h3>#MUKBANG</h3>
+    </div>
+    <div class="button-group js-radio-button-group">
+        <button class="button" onclick="location.href='tag1'">#Let's walk Together</button>
+        <button class="button" onclick="location.href='tag2'">#Spectacular Night View</button>
+        <button class="button" onclick="location.href='tag3'">#Newtro</button>
+        <button class="button" onclick="location.href='tag4'">#In the Drama/Movie</button>
+        <button class="button" onclick="location.href='tag5'">#For foreigners</button>
+        <button class="button is-checked" onclick="location.href='tag6'">#MUKBANG</button>
+    </div>
+    <div class="col s12 m7">
+        <div class="card horizontal">
+            <div class="card-image">
+                <img src="/assets/img/tag/mukbang/신당동 떡볶이 골목.jpg" width=400 height=300 class="fadefx fadeIn">
+            </div>
+            <div class="card-stacked">
+                <div class="card-content">
+                    <span id="title0"></span>
+                    <p id="name0"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col s12 m7">
+        <div class="card horizontal">
+            <div class="card-image">
+                <img src="/assets/img/tag/mukbang/남대문시장.jpg" width=400 height=300 class="fadefx fadeIn">
+            </div>
+            <div class="card-stacked">
+                <div class="card-content">
+                    <span id="title1"></span>
+                    <p id="name1"></p>
+                    </span>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col s12 m7">
+        <div class="card horizontal">
+            <div class="card-image">
+                <img src="/assets/img/tag/mukbang/광장시장.jpg" width=400 height=300 class="fadefx fadeIn">
+            </div>
+
+            <div class="card-stacked">
+                <div class="card-content">
+                    <span id="title2"></span>
+                    <p id="name2"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col s12 m7">
+        <div class="card horizontal">
+            <div class="card-image">
+                <img src="/assets/img/tag/mukbang/서울중앙시장.png" width=400 height=300 class="fadefx fadeIn">
+            </div>
+            <div class="card-stacked">
+                <div class="card-content">
+                    <span id="title3"></span>
+                    <p id="name3"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col s12 m7">
+        <div class="card horizontal">
+            <div class="card-image">
+                <img src="/assets/img/tag/mukbang/동묘벼룩시장.jpg" width=400 height=300 class="fadefx fadeIn">
+            </div>
+            <div class="card-stacked">
+                <div class="card-content">
+                    <span id="title4"></span>
+                    <p id="name4"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

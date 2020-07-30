@@ -1,0 +1,211 @@
+@import url("https://fonts.googleapis.com/css2?family=Alex+Brush&family=Roboto&family=Rubik:wght@300;400;500;700;900&family=Titillium+Web:wght@300;400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Anton&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap");
+@media only screen and (min-width: 0)
+{html {
+    font-size: 14px;
+}
+    html{
+        line-height: 1.5;
+        font-family: "Roboto", sans-serif;
+        font-weight: normal;;
+        color: rgba(0,0,0,0.87)
+    }}
+
+.tag_title {
+    text-align: right;
+    font-family: 'Anton', sans-serif;
+}
+
+
+.container{
+    margin: auto;
+    max-width: 1280px;
+    width: 90%;
+}  *, *:before, *:after {
+    box-sizing: inherit;
+} div {
+    display: block;
+}
+
+
+.card.horizontal{
+    display: flex;
+}
+.card{
+    position:relative;
+    margin: 0.5rem 0 1rem 0;
+    background-color: #fff;
+    transition: box-shadow .25s;
+    border-radius: 2px;
+}
+.z-depth-1, .card-panel, .card, .toast, .btn, .btn-large, .btn-floating, .dropdown-content, .collapsible, .side-nav {
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+}
+
+.card.horizontal .card-image{
+    max-width: 50%;
+}
+.card.horizontal .card-image img {
+    max-width: 100%;
+}
+.card .card-image img {
+    display: block;
+    border-radius: 2px 2px 0 0;
+    position: relative;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+.fadeIn {
+    animation-name: fadeIn;
+    -webkit-animation-name: fadeIn;
+    animation-duration: 1.5s;
+    -webkit-animation-duration: 1.5s;
+    animation-timing-function: ease-in-out;
+    -webkit-animation-timing-function: ease-in-out;
+    visibility: visible !important;
+}
+img {
+    border: 0;
+}
+
+
+.card.horizontal .card-stacked {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    position: relative;
+}
+.card.horizontal .card-stacked .card-content {
+    -webkit-flex-grow: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+}
+.card .card-content {
+    padding: 20px;
+    border-radius: 0 0 2px 2px;
+}
+.card .card-content span{
+    line-height: 48px;
+}
+.card span{
+    font-size: 24px;
+    font-weight: 300;
+}
+.card .card-content p {
+    margin: 0;
+    color: inherit;
+}
+p {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+}
+
+.fadeIn {
+    animation-name: fadeIn;
+    -webkit-animation-name: fadeIn;
+    animation-duration: 1.5s;
+    -webkit-animation-duration: 1.5s;
+    animation-timing-function: ease-in-out;
+    -webkit-animation-timing-function: ease-in-out;
+    visibility: visible !important;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0.0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@-webkit-keyframes fadeIn {
+    0% {
+        opacity: 0.0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+body{background-color: #E0E0E0;}
+
+#title0{
+    font-family: 'Do Hyeon', sans-serif;
+}
+
+#title1{
+    font-family: 'Do Hyeon', sans-serif;
+}
+
+#title2{
+    font-family: 'Do Hyeon', sans-serif;
+}
+
+#title3{
+    font-family: 'Do Hyeon', sans-serif;
+}
+
+#title4{
+    font-family: 'Do Hyeon', sans-serif;
+}
+
+#title5{
+    font-family: 'Do Hyeon', sans-serif;
+}
+
+
+.button {
+    display: inline-block;
+    outline: none;
+    padding: 0.5em 1.0em;
+    margin-top:6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #444;
+    font-size: 0.9em;
+    background-color: white;
+    transition: all 0.2s;
+}
+
+.button:hover {
+    background-color: #ccc;
+    color: black;
+}
+
+.button:active,
+.button.is-checked {
+    background-color: #444;
+    border:1px solid #444;
+}
+
+.button.is-checked {
+    color: white;
+}
+
+.button:active {
+}
+
+/* ---- button-group ---- */
+
+.button-group:after {
+    content: '';
+    display: block;
+    clear: both;
+}
+
+.button-group .button {
+    float: left;
+    border-radius: 0;
+    margin-left: 0;
+    margin-right: -1px;
+}
+
+.button-group .button:first-child { border-radius: 4px 0 0 4px; }
+.button-group .button:last-child { border-radius: 0 4px 4px 0; }

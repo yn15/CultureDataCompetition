@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <title>Culture Map</title>
+    <link href="/map/map.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 지도 부분 화면 -->
+<div class="map-container">
+    <!-- 지도 -->
+    <div id="map" class="map"></div>
+    <!-- 카테고리 선택 -->
+    <div class="category-list">
+        <div class="category-item All" onclick="searchTheme('All')">
+            SHOW ALL
+        </div>
+        <div class="category-item-divider"></div>
+        <div class="category-item History" onclick="searchTheme('History')">
+            History
+        </div>
+        <div class="category-item-divider"></div>
+        <div class="category-item Market" onclick="searchTheme('Market')">
+            Market
+        </div>
+        <div class="category-item-divider"></div>
+        <div class="category-item Temple" onclick="searchTheme('Temple')">
+            Temple
+        </div>
+        <div class="category-item-divider"></div>
+        <div class="category-item Bukchon_traditional_activity" onclick="searchTheme('Bukchon_traditional_activity')">
+            Buckchon traditional activity
+        </div>
+    </div>
+
+    <!-- 현재 위치로 이동 -->
+    <div class="current-position-container" >
+        <img id= "current-position-img" class="current-position-img" src="/map/baseline_my_location_black_48dp.png" onclick="watchPosition()">
+    </div>
+</div>
+
+
+<!-- 검색 -->
+    <form class ="search" accept-charset="utf-8" onsubmit="searchSpace(); return false;">
+        <button class="home-button" type="button" onclick="location.href='index'"></button>
+        <input class="search-text" type="text" id="keyword" value="" placeholder="What are you finding?">
+        <input class="search-submit" type="submit" value=" ">
+    </form>
+
+<!-- 목록 -->
+<div class="place-list" id="placesList"></div>
+
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=7c2ea6cdea824e6159caeae6cc70ec39"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var culture = /*[[${culture}]]*/ 'default'; // 전체 데이터
+    var theme_category = /*[[${theme}]]*/ 'default'; // 테마들
+    /*]]>*/
+    var watchState = false;
+
+    // 데이터 처리
+    var theme = []; // 데이터들이 저장될 배열 [[유적지 테마 데이터들(딕셔너리들)], [사찰 테마 데이터들(딕셔너리들)], ...]
+    for (var i = 0; i < theme_category.length; i++) {
+        theme.push([]); // 테마 수만큼 배열 생성
+    }
+    for (var i = 0; i < culture.length; i++) {
+        var info = JSON.parse(culture[i]); // 해당 테마의 정보들
+        var idx = theme_category.indexOf(info.category); // 해당 테마의 인덱스
+        // 테마 배열에 테마 정보들 저장
+        theme[idx].push({
+            category: info.category,
+            k_name: info.k_name,
+            e_name: info.e_name,
+            lng: info.lng,
+            lat: info.lat,
+            gu: info.gu,
+            dong: info.dong,
+            k_describe: info.k_describe,
+            e_describe: info.e_describe,
+            tel: info.tel,
+            img_url: info.img_url,
+            tag: info.tag
+        });
+    }
+
+    // 현재 테마 정보 관리 변수
+    var current_theme_index = 4; // 현재 설정된 테마의 인덱스
+    var current_theme = theme_category[current_theme_index]; // 현재 설정된 테마
+
+    // 반경 관리 변수
+    var distance = 10000; // 미터 단위의 반경 (현재 디버깅 때문에 이렇게 설정. 후에 대폭 감소 예정)
+
+    // 지도 처리
+    var mapContainer = document.getElementById('map'); // 지도를 표시할 div
+    var mapOption = {
+        center: new kakao.maps.LatLng(37.566535, 126.9779692), // 지도의 중심 좌표
+        level: 3 // 지도의 확대 레벨 (현재 디버깅 때문에 이렇게 설정. 후에 1로 설정 예정)
+    };
+    var map = new kakao.maps.Map(mapContainer, mapOption); // 지도 생성
+    var mapTypeControl = new kakao.maps.MapTypeControl(); // 일반 지도와 스카이뷰로 지도 타입을 전환할 수 있는 지도 타입 컨트롤 생성
+    map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT); // 지도에 타입 컨트롤 추가
+    var zoomControl = new kakao.maps.ZoomControl(); // 지도 확대 축소를 제어할 수 있는 줌 컨트롤 생성
+    map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT); // 지도에 줌 컨트롤 추가
+
+    // 마커 관리 변수
+    //****************
+    var markers = []; // 마커가 저장될 배열
+    var markers_search = []; // 검색 전용 마커 배열
+    {"History", "Market", "Temple", "Bukchon_traditional_activity", "All"}; // 테마들
+
+    var markerImageSrc = [
+        "/map/history.png", // 역사
+        "/map/market.png", //시장
+        "/map/temple.png", //사찰
+        "/map/buckchon.png"
+    ]
+    // 각 테마에 해당하는 마커 이미지의 이미지 주소
+
+    // 인포 윈도우 관리 변수************
+    var infowindow = new kakao.maps.InfoWindow({
+        zIndex:1
+    }); // 검색 결과 목록이나 마커에 마우스를 올렸을 때 정보를 표시할 인포윈도우 생성
+
+    // 커스텀 오버레이 관리 변수
+    var customOverlays = []; // 커스텀 오버레이가 저장될 배열
+
+    // watchPosition 옵션 변수
+    var options = {
+        enableHighAccuracy: true, // 위치 탐지의 정밀도 증가하지만 전력 소모 증가
+        maximumAge: 0, // 위치 보존 시간으로 0일 경우 캐시에서 확인 안 하고, 매번 새로운 위치를 결정함
+        timeout: Infinity // 위치 결정에 걸리는 시간으로 이 milliseconds 시간 안에 새로운 위치를 결정할 수 없으면 에러 핸들러 호출됨
+    };
+
+    //current position
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(success, error);
+    } else {
+        alert("사용자의 웹 브라우저가 Geolocation API를 지원하지 않습니다!");
+    }
+
+    //watch current position function
+    var watchId;
+    function watchPosition() {
+        var nowImage = document.getElementById("current-position-img");
+        // watchPosition 관리 변수
+        if (!watchState) {
+            watchState = true;
+            nowImage.src = "/map/baseline_my_location_red_48dp.png"
+            watchId = navigator.geolocation.watchPosition(success, error, options); // 실시간으로 위치 트래킹 (위치 정보가 변경된 경우에만 success 콜백 함수 호출됨)
+        }else{
+            watchState = false;
+            nowImage.src = "/map/baseline_my_location_black_48dp.png"
+            navigator.geolocation.clearWatch(watchId); // 실시간 위치 트래킹 활동 중지
+        }
+    }
+
+    // watchPosition error 핸들러
+    function error() {
+        alert('위치를 찾을 수 없습니다.');
+    }
+
+    // 실시간 위치 갱신 및 반경에 있는 선택한 테마들 정보 표시하는 함수 (watchPosition success 핸들러)
+    function success(pos) {
+
+        var lat = pos.coords.latitude; // 현재 위도
+        var lng = pos.coords.longitude; // 현재 경도
+        console.log(lat,lng);
+
+        // 마커 초기화
+        for (var i = 0; i < markers.length; i++) {
+            markers[i].setMap(null);
+        }
+        markers = [];
+
+        // 목록 초기화
+        var listEl = document.getElementById('placesList');
+        //var menuEl = document.getElementById('menu_wrap');
+        var fragment = document.createDocumentFragment();
+        removeAllChildNods(listEl); // 검색 결과 목록에 추가된 항목들 제거
+        var currentLocation = new kakao.maps.LatLng(37.566535, 126.9779692); //###test kkc
+        //var currentLocation = new kakao.maps.LatLng(lat, lng); // 이동할 위도 경도 위치 생성
+        map.setCenter(currentLocation); // 지도 중심 이동
+
+        var index = 1; // 결과 번호
+        var lineLine = new kakao.maps.Polyline();
+        if(current_theme != "All"){
+            for (var i = 0; i < theme[current_theme_index].length; i++) {
+                var linePath = [currentLocation, new kakao.maps.LatLng(theme[current_theme_index][i].lat, theme[current_theme_index][i].lng)]; // 두 위치 지정
+                lineLine.setPath(linePath);
+
+                // 해당 장소가 설정한 반경 내에 있을 경우
+                if (Math.round(lineLine.getLength()) <= distance) {
+                    // 마커 처리
+                    var imageSize = new kakao.maps.Size(40, 40); // 마커 이미지의 크기
+                    var markerImage = new kakao.maps.MarkerImage(markerImageSrc[current_theme_index], imageSize); // 마커 이미지 생성
+                    var marker = new kakao.maps.Marker({ // 마커 생성
+                        map: map, // 마커를 표시할 지도
+                        position: new kakao.maps.LatLng(theme[current_theme_index][i].lat, theme[current_theme_index][i].lng), // 마커를 표시할 위치
+                        title : theme[current_theme_index][i].e_name, // 마커의 타이틀, 마커에 마우스를 올리면 타이틀이 표시됨
+                        image : markerImage // 마커 이미지
+                    });
+                    markers.push(marker);
+
+                    // 목록 처리****************
+                    var itemEl = getListItem(index, theme[current_theme_index][i]); // 검색 결과 항목 Element 생성
+                    (function(marker, spaceInfo) {
+                        itemEl.onmouseover =  function () { // 검색결과 항목에 mouseover 했을 때
+                            displayInfowindow(marker, spaceInfo); // 인포윈도우에 정보 표시
+                        };
+                        itemEl.onmouseout =  function () { // 검색결과 항목에서 mouseout 했을 때
+                            infowindow.close(); // 인포윈도우 닫음
+                        };
+                    })(marker, theme[current_theme_index][i]);
+
+
+                    var content =
+                        '<div class="info">'+
+                        '    <div class="title '+theme[current_theme_index][i].category+'">'
+                        + theme[current_theme_index][i].e_name+
+                        '    </div>'
+                        +'   <div class="body">'
+                        +'       <div class="img">'
+                        +'            <img src="'+theme[current_theme_index][i].img_url+'" style="max-width:80px; max-height:80px;">'
+                        +'       </div>'
+                        +'       <div class="desc">'
+                        +'           <div class="ellipsis">'+theme[current_theme_index][i].e_describe +'</div>'
+                        +'       </div>'
+                        +'    </div>'
+                        +'</div>';
+
+                    var info = new kakao.maps.InfoWindow({
+                        content: content,
+                        removable: true
+                    });
+                    kakao.maps.event.addListener(marker, 'click', displayInfoWindowClick(map, marker,info));
+                    //kakao.maps.event.addListener(marker, 'click', displayCustomOverlayOut(infoWindow));
+
+
+                    fragment.appendChild(itemEl);
+
+                    index += 1;
+                }
+            }
+        }else{
+            for (var i = 0; i < theme.length; i++) {
+                for (var j = 0; j < theme[i].length; j++) {
+                    var linePath = [currentLocation, new kakao.maps.LatLng(theme[i][j].lat, theme[i][j].lng)]; // 두 위치 지정
+                    lineLine.setPath(linePath);
+
+                    // 해당 장소가 설정한 반경 내에 있을 경우
+                    if (Math.round(lineLine.getLength()) <= distance) {
+                        // 마커 처리
+                        var imageSize = new kakao.maps.Size(40, 40); // 마커 이미지의 크기
+                        var markerImage = new kakao.maps.MarkerImage(markerImageSrc[theme_category.indexOf(theme[i][j].category)], imageSize); // 마커 이미지 생성
+
+                        var marker = new kakao.maps.Marker({ // 마커 생성
+                            map: map, // 마커를 표시할 지도
+                            position: new kakao.maps.LatLng(theme[i][j].lat, theme[i][j].lng), // 마커를 표시할 위치
+                            title : theme[i][j].e_name, // 마커의 타이틀, 마커에 마우스를 올리면 타이틀이 표시됨
+                            image : markerImage // 마커 이미지
+                        });
+                        markers.push(marker);
+
+                        // 목록 처리****************
+                        var itemEl = getListItem(index, theme[i][j]); // 검색 결과 항목 Element 생성
+                        (function(marker, spaceInfo) {
+                            itemEl.onmouseover =  function () { // 검색결과 항목에 mouseover 했을 때
+                                displayInfowindow(marker, spaceInfo); // 인포윈도우에 정보 표시
+                            };
+                            itemEl.onmouseout =  function () { // 검색결과 항목에서 mouseout 했을 때
+                                infowindow.close(); // 인포윈도우 닫음
+                            };
+                            //***test====================var content = '<div class="wrap">'+
+                        })(marker, theme[i][j]);
+
+
+                        var content =
+                            '<div class="info">'+
+                            '    <div class="title'+theme[i][j].category +'">'
+                            + theme[i][j].e_name+
+                            '    </div>'
+                            +'   <div class="body">'
+                            +'       <div class="img">'
+                            +'            <img src="'+theme[i][j].img_url+'" style="max-width:80px; max-height:80px;">'
+                            +'       </div>'
+                            +'       <div class="desc">'
+                            +'           <div class="ellipsis">'+theme[i][j].e_describe +'</div>'
+                            +'       </div>'
+                            +'    </div>'
+                            +'</div>';
+
+                        var info = new kakao.maps.InfoWindow({
+                            content: content,
+                            removable: true
+                        });
+                        kakao.maps.event.addListener(marker, 'click', displayInfoWindowClick(map, marker,info));
+
+                        fragment.appendChild(itemEl);
+
+                        index += 1;
+                    }
+                }
+            }
+        }
+        listEl.appendChild(fragment); // 검색결과 항목들을 검색결과 목록 Element에 추가
+        //menuEl.scrollTop = 0;
+    }
+
+    // 인포 윈도우 표시 함수 (인포 윈도우 내용 및 디자인 변경 시 이 안에 있는 HTML 코드 변경해야 함)
+    function displayInfowindow(marker, spaceInfo) {
+        var content =
+            '<div class="info">'+
+            '    <div class="title '+spaceInfo.category +'">'
+            + spaceInfo.e_name
+            +'      <div class="close" onclick="closeOverlay()" title="닫기"></div>' +
+            '</div>'
+            +'   <div class="body">'
+            +'       <div class="img">'
+            +'            <img src="'+spaceInfo.img_url+'" style="max-width:80px; max-height:80px;">'
+            +'       </div>'
+            +'       <div class="desc">'
+            +'           <div class="ellipsis">'+spaceInfo.e_describe +'</div>'
+            +'       </div>'
+            +'    </div>'
+            +'</div>';
+        infowindow.setContent(content);
+        infowindow.open(map, marker);
+    }
+
+    //*************************
+    // 검색결과 항목을 Element로 반환하는 함수 (목록 내용 및 디자인 변경 시 이 안에 있는 HTML 코드 변경해야 함)
+    function getListItem(index, spaceInfo) {
+        var el = document.createElement('div');
+        var itemStr = '<div style="float: left; width: 310px;">'
+            +'<div class="place-item-name">'+spaceInfo.e_name+'</div>'
+            +'<div class="place-item-address"><span>'+spaceInfo.gu+'</span> <span>'+spaceInfo.dong+'</span></div>'
+            +'<div class="place-item-tel">'+spaceInfo.tel+'</div>'
+            +'</div>';
+        itemStr += '<div style="float: left; width: 130px">'
+            +'<div class="place-item-category  '+spaceInfo.category+'">'+ (spaceInfo.category == "Bukchon_traditional_activity" ? "Bukchon" : spaceInfo.category)+'</div>'
+            +'<img class="place-item-img" src="'+spaceInfo.img_url+'">'
+            +'</div>';
+        itemStr += '<div class="place-item-describe">' + spaceInfo.e_describe +'</div>'
+            +'<div class="place-item-divider"></div></div>';
+
+        el.innerHTML = itemStr;
+        el.className = 'place-item';
+        return el;
+    }
+
+    // 검색결과 목록의 자식 Element를 제거하는 함수
+    function removeAllChildNods(el) {
+        while (el.hasChildNodes()) {
+            el.removeChild (el.lastChild);
+        }
+    }
+
+    //********************
+    // 테마 설정 시 테마 변경하는 함수
+    function searchTheme(theme_name) {
+        current_theme = theme_name; // 현재 테마 변경
+        current_theme_index = theme_category.indexOf(theme_name); // 현재 테마의 인덱스 변경
+
+        if(watchState){
+            // 변경된 테마 정보에 맞게 출력될 정보들 갱신하는 효과
+            navigator.geolocation.clearWatch(watchId); // 실시간 위치 트래킹 활동 중지
+            watchId = navigator.geolocation.watchPosition(success, error, options); // 실시간으로 위치 트래킹
+        }else{
+            navigator.geolocation.getCurrentPosition(success, error);
+        }
+    }
+
+    // 검색한 장소의 커스텀 오버레이 표시 함수
+    function searchSpace() {
+        var name = document.getElementById('keyword').value; // 검색한 장소
+
+        // 장소를 입력하지 않았을 경우
+        if (!name.replace(/^\s+|\s+$/g, '')) {
+            alert('장소를 입력하세요.');
+            return false;
+        }
+
+        // 커스텀 오버레이 초기화
+        for (var i = 0; i < customOverlays.length; i++) {
+            customOverlays[i].setMap(null);
+        }
+        customOverlays = [];
+
+        // 반경 상관 없이 검색한 장소 탐색
+        var find = false; // 검색 성공 여부
+        for (var i = 0; i < theme.length; i++) {
+            for (var j = 0; j < theme[i].length; j++) {
+                // 검색한 장소가 있을 경우
+                if (theme[i][j].e_name.toLowerCase() == name.toLowerCase()) {
+                    // 지도 중심을 검색한 장소로 이동
+                    var moveLatLon = new kakao.maps.LatLng(theme[i][j].lat, theme[i][j].lng); // 이동할 위도 경도 위치 생성
+                    map.setCenter(moveLatLon); // 지도 중심 이동
+                    map.setLevel(3, { // 지도의 확대 레벨 (현재 디버깅 때문에 이렇게 설정. 후에 1로 설정 예정)
+                        animate: { // 지도 확대
+                            duration: 350 // 확대 애니메이션 시간
+                        }
+                    });
+
+                    var imageSize = new kakao.maps.Size(24, 35); // 마커 이미지의 크기
+                    var markerImage = new kakao.maps.MarkerImage(markerImageSrc[i], imageSize); // 마커 이미지 생성
+                    var marker = new kakao.maps.Marker({ // 마커 생성
+                        map: map, // 마커를 표시할 지도
+                        position: new kakao.maps.LatLng(theme[i][j].lat, theme[i][j].lng), // 마커를 표시할 위치
+                        title: theme[i][j].e_name, // 마커의 타이틀, 마커에 마우스를 올리면 타이틀이 표시됨
+                        image: markerImage // 마커 이미지
+                    });
+                    markers_search.push([name, marker]);
+
+                    // 검색한 장소 커스텀 오버레이 표시
+                    displayCustomOverlay(name, theme[i][j], moveLatLon);
+
+                    find = true;
+                    break;
+                }
+            }
+            // 검색 결과가 있을 경우
+            if (find) {
+                break;
+            }
+        }
+
+        // 검색 결과가 없을 경우
+        if (!find) {
+            alert('검색 결과가 없습니다.');
+        }
+    }
+
+    // 커스텀 오버레이 표시 함수 (커스텀 오버레이 내용 및 디자인 변경 시 이 안에 있는 HTML 코드 변경해야 함)
+    function displayInfoWindowClick(map, marker, info) {
+        return function() {
+            info.open(map, marker);
+        };
+    }
+
+    function displayCustomOverlay(name, spaceInfo, pos) {
+        // 커스텀 오버레이에 표시할 내용 (HTML 문자열 또는 Dom Element)
+        var content = '<div class="wrap">' +
+            '                <div class="info">' +
+            '                    <div class="title temple">' + name +
+            '                        <div class="close" onclick="closeOverlay(\'' + name + '\')" title="close"></div>' +
+            '                    </div>' +
+            '                    <div class="body">' +
+            '                        <div class="img">' +
+            '                            <img src="' + spaceInfo.img_url + '"' +
+            '                                 style="max-width:80px; max-height:80px;">' +
+            '                        </div>' +
+            '                        <div class="desc">' +
+            '                            <div class="ellipsis">';
+        for (var i = 1; i < spaceInfo.e_describe.length; i++) {
+            content += spaceInfo.e_describe[i];
+            if (i % 30 == 0) {
+                content += '<br>';
+            }
+        }
+        content += '                   </div>' +
+            '                        </div>' +
+            '                    </div>' +
+            '                </div>' +
+            '            </div>';
+        var position = pos; // 커스텀 오버레이가 표시될 위치
+        var customOverlay = new kakao.maps.CustomOverlay({ // 커스텀 오버레이 생성
+            position: position,
+            content: content,
+            xAnchor: 0.3,
+            yAnchor: 0.91
+        });
+        customOverlay.setMap(map); // 커스텀 오버레이를 지도에 표시
+        customOverlays.push([spaceInfo.e_name, customOverlay]);
+    }
+
+
+    function closeOverlay(name) {
+        // 해당 커스텀 오버레이와 검색 전용 마커 초기화
+        for (var i = 0; i < markers_search.length; i++) {
+            if (markers_search[i][0] == name) {
+                markers_search[i][1].setMap(null);
+                markers_search.splice(i, 1);
+                customOverlays[i][1].setMap(null);
+                customOverlays.splice(i, 1);
+                break;
+            }
+        }
+    }
+</script>
+</body>
+</html>
