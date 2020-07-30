@@ -16,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
@@ -26,8 +27,12 @@ public class CultureController {
     private final String[] tag_s = new String[]{"Let's walk Together", "Spectacular Night View", "Newtro", "In the Drama/Movie ", "For foreigners", "MUKBANG"};
     private final String[] theme = new String[]{"History", "Market", "Temple", "Bukchon_traditional_activity", "All"}; // 테마들
 
+    private HashMap<String, Integer> countOfEachCategory = new HashMap<String, Integer>();
+
     public CultureController() throws InvalidFormatException {
         try {
+            for(int i = 0; i < theme.length; i++) countOfEachCategory.put(theme[i], 0);
+
             //FileInputStream fis = new FileInputStream(getClass().getResource("/data.xlsx").getFile());
             //XSSFWorkbook workbook = new XSSFWorkbook(fis);
             InputStream in = getClass().getResourceAsStream("/dataTag.xlsx");
@@ -61,6 +66,8 @@ public class CultureController {
                     //System.out.println(rowData.get(0)+" "+ rowData.get(1)+" "+ rowData.get(2)+" "+ Double.parseDouble(rowData.get(3))+" "+ Double.parseDouble(rowData.get(4))+" "+ rowData.get(5)+" "+ rowData.get(6)+" "+ rowData.get(7)+" "+ rowData.get(8)+" "+ rowData.get(9)+" "+ rowData.get(10)+" "+ rowData.get(11));
                     cultureObj.add(new Culture(rowData.get(0), rowData.get(1), rowData.get(2), Double.parseDouble(rowData.get(3)), Double.parseDouble(rowData.get(4)), rowData.get(5), rowData.get(6), rowData.get(7), rowData.get(8), rowData.get(9), rowData.get(10), rowData.get(11)));
 
+                    countOfEachCategory.put(rowData.get(0), countOfEachCategory.get(rowData.get(0)) + 1);
+                    countOfEachCategory.put("All", countOfEachCategory.get("All") + 1);
                 }
             }
             //for (int i = 0; i < cultureObj.size(); i++) {
@@ -129,10 +136,11 @@ public class CultureController {
         return "tag6";
     }
 
-    @RequestMapping("/index")
+    @RequestMapping({"/", "/index"})
     public String index(Model model) {
         model.addAttribute("culture", culture);
         model.addAttribute("theme", tag_s);
+        model.addAttribute("countOfEachCategory", countOfEachCategory);
         return "index";
     }
 
