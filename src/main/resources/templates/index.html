@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="zxx">
+<html class="no-js" lang="zxx" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -136,7 +136,7 @@
                         </div>
                         <div class="location-details">
                             <p>history</p>
-                            <a href="#" class="location-btn">65 <i class="ti-plus"></i> Listing</a>
+                            <a href="#" class="location-btn"><span th:text="${countOfEachCategory.get('History')}"></span> <i class="ti-plus"></i> Listing</a>
                         </div>
                     </div>
                 </div>
@@ -147,7 +147,7 @@
                         </div>
                         <div class="location-details">
                             <p>Traditional Market</p>
-                            <a href="#" class="location-btn">60 <i class="ti-plus"></i> Listing</a>
+                            <a href="#" class="location-btn"><span th:text="${countOfEachCategory.get('Market')}"></span> <i class="ti-plus"></i> Listing</a>
                         </div>
                     </div>
                 </div>
@@ -158,7 +158,7 @@
                         </div>
                         <div class="location-details">
                             <p>Temple</p>
-                            <a href="#" class="location-btn">50 <i class="ti-plus"></i> Listing</a>
+                            <a href="#" class="location-btn"><span th:text="${countOfEachCategory.get('Temple')}"></span> <i class="ti-plus"></i> Listing</a>
                         </div>
                     </div>
                 </div>
@@ -169,7 +169,7 @@
                         </div>
                         <div class="location-details">
                             <p>BukChon Traditional Activity</p>
-                            <a href="#" class="location-btn">99 <i class="ti-plus"></i> Listing</a>
+                            <a href="#" class="location-btn"><span th:text="${countOfEachCategory.get('Bukchon_traditional_activity')}"></span> <i class="ti-plus"></i> Listing</a>
                         </div>
                     </div>
                 </div>
